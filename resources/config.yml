@@ -1,0 +1,9 @@
+eventDb:
+  file: ${DB_FILE:-resources/event-db/event_db.db}
+  name: ${DB_NAME:-event_db}
+  migrationLoc: ${DB_MIGRATION_LOC:-migrations}
+server:
+  port: ${SERVER_PORT:-3000}
+ipGeoDbConfig:
+  location: ${IP_GEO_DB_LOC:-resources/geo-database/GeoLite2-City.mmdb}
+suspiciousSpeed: ${SUSPICIOUS_SPEED:-500}
