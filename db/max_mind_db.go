@@ -4,34 +4,41 @@ import (
 	appConfig "github.com/frankiennamdi/detection-api/config"
 	"github.com/frankiennamdi/detection-api/support"
 	"github.com/oschwald/geoip2-golang"
+	"log"
 )
 
 type MaxMindDb struct {
-	Config appConfig.AppConfig
+	config                   appConfig.AppConfig
+	maxMindDbConnectionLimit chan int
 }
 
-type MaxMindDbContext struct {
-	db *geoip2.Reader
+type MaxMindDbRequired func(db *geoip2.Reader) error
+
+func NewMaxMindDb(config appConfig.AppConfig) *MaxMindDb {
+	return &MaxMindDb{config: config, maxMindDbConnectionLimit: make(chan int, config.IPGeoDbConfig.MaxConnection)}
 }
 
-func (maxMindDb *MaxMindDb) NewContext() (*MaxMindDbContext, error) {
-	db, err := geoip2.Open(support.Resolve(maxMindDb.Config.IPGeoDbConfig.Location))
+func (maxMindDb *MaxMindDb) WithMaxMindDb(fnx MaxMindDbRequired) (err error) {
+	maxMindDb.maxMindDbConnectionLimit <- 1
+	db, err := geoip2.Open(support.Resolve(maxMindDb.config.IPGeoDbConfig.Location))
 
 	if err != nil {
-		return nil, err
+		<-maxMindDb.maxMindDbConnectionLimit
+		return err
 	}
 
-	return &MaxMindDbContext{db: db}, err
-}
+	defer func() {
+		<-maxMindDb.maxMindDbConnectionLimit
 
-func (maxMindDbContext *MaxMindDbContext) Close() error {
-	if err := maxMindDbContext.db.Close(); err != nil {
+		if closeErr := db.Close(); closeErr != nil {
+			log.Printf(support.Warn, closeErr)
+			err = closeErr
+		}
+	}()
+
+	if err := fnx(db); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (maxMindDbContext *MaxMindDbContext) Db() *geoip2.Reader {
-	return maxMindDbContext.db
 }

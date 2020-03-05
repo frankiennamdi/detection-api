@@ -7,13 +7,15 @@ import (
 )
 
 type EventDbConfig struct {
-	File         string `config:"file"`
-	Name         string `config:"name"`
-	MigrationLoc string `config:"migrationLoc"`
+	File          string `config:"file"`
+	Name          string `config:"name"`
+	MigrationLoc  string `config:"migrationLoc"`
+	MaxConnection int    `config:"maxConnection"`
 }
 
 type IPGeoDbConfig struct {
-	Location string `config:"location"`
+	Location      string `config:"location"`
+	MaxConnection int    `config:"maxConnection"`
 }
 
 type ServerConfig struct {

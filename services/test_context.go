@@ -20,11 +20,14 @@ func SetUp() *Test {
 	path := support.Resolve("migrations")
 	appConfig := config.AppConfig{
 		EventDb: config.EventDbConfig{
-			File:         filepath.Join(temporaryDir.Path(), "sqlite3.db"),
-			Name:         "event_db",
-			MigrationLoc: path,
+			File:          filepath.Join(temporaryDir.Path(), "sqlite3.db"),
+			Name:          "event_db",
+			MigrationLoc:  path,
+			MaxConnection: 100,
 		},
-		IPGeoDbConfig:   config.IPGeoDbConfig{Location: "resources/geo-database/GeoLite2-City.mmdb"},
+		IPGeoDbConfig: config.IPGeoDbConfig{
+			Location:      "resources/geo-database/GeoLite2-City.mmdb",
+			MaxConnection: 100},
 		SuspiciousSpeed: 500,
 	}
 

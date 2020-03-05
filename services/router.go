@@ -12,7 +12,6 @@ type Router struct {
 func (router Router) setRoutes(routes *mux.Router) *mux.Router {
 	detectionController := EventDetectionController{
 		DetectionService: router.serverContext.detectionService,
-		EventRepository:  router.serverContext.eventRepository,
 	}
 
 	routes.HandleFunc("/api/health-check", StatusHandler).Methods(http.MethodGet)
@@ -24,5 +23,6 @@ func (router Router) setRoutes(routes *mux.Router) *mux.Router {
 func (router Router) InitRoutes() *mux.Router {
 	routes := mux.NewRouter().StrictSlash(false)
 	configuredRoutes := router.setRoutes(routes)
+
 	return configuredRoutes
 }

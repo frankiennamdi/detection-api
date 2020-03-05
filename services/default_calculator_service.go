@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-type CalculatorService interface {
-	HaversineDistance(fromPoint, toPoint models.GeoPoint) models.GeoDistance
-	TimeDifferenceInHours(currentTimeStamp, previousTimeStamp int64) float64
-	SpeedToTravelDistanceInMPH(eventGeoInfoFrom, eventGeoInfoTo models.EventGeoInfo) float64
-}
-
 type DefaultCalculatorService struct{}
 
 const (

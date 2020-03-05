@@ -6,19 +6,19 @@ import (
 	"net"
 )
 
-type DefaultDetectionService struct {
+type LoginDetectionService struct {
 	eventRepository     EventRepository
 	ipGeoInfoRepository IPGeoInfoRepository
 	calculatorService   CalculatorService
 	suspiciousSpeed     float64
 }
 
-func NewDetectionService(
+func NewLoginDetectionService(
 	eventRepository EventRepository,
 	ipGeoInfoRepository IPGeoInfoRepository,
 	calculatorService CalculatorService,
-	suspiciousSpeed float64) *DefaultDetectionService {
-	return &DefaultDetectionService{
+	suspiciousSpeed float64) *LoginDetectionService {
+	return &LoginDetectionService{
 		eventRepository:     eventRepository,
 		ipGeoInfoRepository: ipGeoInfoRepository,
 		calculatorService:   calculatorService,
@@ -26,13 +26,17 @@ func NewDetectionService(
 	}
 }
 
-func (service DefaultDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
-	relatedEventInfo, err := service.FindRelatedEvents(currEvent)
+func (service LoginDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
+	if _, err := service.eventRepository.Insert([]*models.Event{currEvent}); err != nil {
+		return nil, err
+	}
+
+	relatedEventInfo, err := service.findRelatedEvents(currEvent)
 	if err != nil {
 		return nil, err
 	}
 
-	suspiciousTravelResult, err := service.FindSuspiciousTravel(relatedEventInfo)
+	suspiciousTravelResult, err := service.findSuspiciousTravel(relatedEventInfo)
 
 	if err != nil {
 		return nil, err
@@ -41,7 +45,7 @@ func (service DefaultDetectionService) ProcessEvent(currEvent *models.Event) (*m
 	return suspiciousTravelResult, err
 }
 
-func (service DefaultDetectionService) FindSuspiciousTravel(
+func (service LoginDetectionService) findSuspiciousTravel(
 	relatedEventInfo *models.RelatedEventInfo) (*models.SuspiciousTravelResult, error) {
 	result := &models.SuspiciousTravelResult{}
 
@@ -119,7 +123,7 @@ func (service DefaultDetectionService) FindSuspiciousTravel(
 	return result, nil
 }
 
-func (service DefaultDetectionService) FindRelatedEvents(currEvent *models.Event) (*models.RelatedEventInfo, error) {
+func (service LoginDetectionService) findRelatedEvents(currEvent *models.Event) (*models.RelatedEventInfo, error) {
 	allEvents, err := service.eventRepository.FindByUsername(currEvent.ToEventInfo().Username)
 	if err != nil {
 		return nil, err

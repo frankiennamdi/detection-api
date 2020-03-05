@@ -25,12 +25,12 @@ func TestConfigWithEnvironment(t *testing.T) {
 
 func unsetEnv(key string) {
 	if err := os.Unsetenv(key); err != nil {
-		log.Fatalf(support.Fatal, err)
+		log.Panicf(support.Fatal, err)
 	}
 }
 
 func setEnv(key string, value string) {
 	if err := os.Setenv(key, value); err != nil {
-		log.Fatalf(support.Fatal, err)
+		log.Panicf(support.Fatal, err)
 	}
 }

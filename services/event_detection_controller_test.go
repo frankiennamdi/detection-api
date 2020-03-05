@@ -26,7 +26,6 @@ func TestEventDetectionHandler(t *testing.T) {
 
 	detectionController := EventDetectionController{
 		DetectionService: testSetup.ServerContext().detectionService,
-		EventRepository:  testSetup.ServerContext().eventRepository,
 	}
 	requestRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(detectionController.EventDetectionHandler)
@@ -42,7 +41,6 @@ func TestEventDetectionHandler_With_Subsequent_Event(t *testing.T) {
 
 	detectionController := EventDetectionController{
 		DetectionService: testSetup.ServerContext().detectionService,
-		EventRepository:  testSetup.ServerContext().eventRepository,
 	}
 
 	req := require.New(t)

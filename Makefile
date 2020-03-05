@@ -2,6 +2,11 @@ SHELL := /bin/bash
 APP_NAME = detection-api
 VERSION ?= 0.1
 
+.PHONY: clean dependencies build test run run-image build-image clean run-generator
+
+clean:
+	rm $(PWD)/resources/event-db/event_db.db || true
+
 dependencies:
 	go mod vendor; go mod tidy
 
@@ -11,11 +16,14 @@ build: dependencies test
 test: dependencies
 	go test -coverprofile=cover.out ./... -v
 
-run: build
+run: clean build
 	$(PWD)/bin/$(APP_NAME)
 
-build-image: build
+build-image: clean build
 	docker build --no-cache -t frankiennamdi/detection-api:$(VERSION) .
+
+run-generator:
+	go run generator/event_generator.go
 
 run-image: build-image
 	docker stop detection-api || true; docker rm detection-api || true;\

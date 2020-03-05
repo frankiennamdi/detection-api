@@ -163,10 +163,23 @@ func TestInsertAndQueryEvent_That_Events_Are_Returned_In_Order(t *testing.T) {
 	req.Equal(expectedTimeStamps, actualTimeStamps)
 }
 
+func TestFindEventByUsername_In_Empty_Database(t *testing.T) {
+	testSetup := SetUp()
+
+	defer testSetup.CleanUp()
+
+	req := require.New(t)
+	eventRepository := NewSQLLiteEventsRepository(testSetup.ServerContext().EventDb())
+	events, err := eventRepository.FindByUsername("john")
+	req.NoError(err)
+	req.NotNil(events)
+	req.Len(events, 0)
+}
+
 func newTestEvent(eventInfo models.EventInfo) *models.Event {
 	event, err := models.NewEvent(eventInfo)
 	if err != nil {
-		log.Fatalf(support.Fatal, err)
+		log.Panicf(support.Fatal, err)
 	}
 
 	return event

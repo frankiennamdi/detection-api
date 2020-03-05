@@ -10,7 +10,6 @@ import (
 
 type EventDetectionController struct {
 	DetectionService DetectionService
-	EventRepository  EventRepository
 }
 
 func (controller *EventDetectionController) EventDetectionHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,13 +24,6 @@ func (controller *EventDetectionController) EventDetectionHandler(w http.Respons
 	if err != nil {
 		log.Printf(support.Error, err)
 		respondWithError(w, http.StatusBadRequest, "can pass request body")
-
-		return
-	}
-
-	if _, err := controller.EventRepository.Insert([]*models.Event{event}); err != nil {
-		log.Printf(support.Error, err)
-		respondWithError(w, http.StatusBadRequest, "Unable to process request")
 
 		return
 	}

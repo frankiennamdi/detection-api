@@ -7,10 +7,12 @@ import (
 	"github.com/frankiennamdi/detection-api/support"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"log"
 )
 
 type SqLiteDb struct {
-	Config appConfig.AppConfig
+	config                  appConfig.AppConfig
+	sqLiteDbConnectionLimit chan int
 }
 
 type SqLiteDbContext struct {
@@ -18,34 +20,41 @@ type SqLiteDbContext struct {
 	config appConfig.AppConfig
 }
 
-func (sqLiteDb *SqLiteDb) NewCreateContext() (*SqLiteDbContext, error) {
-	return sqLiteDb.newContext("mode=rwc")
+type TransactionEnabled func(tx *sql.Tx) error
+
+type sqLiteDbRequired func(context *SqLiteDbContext) error
+
+func NewSqLiteDb(config appConfig.AppConfig) *SqLiteDb {
+	return &SqLiteDb{config: config, sqLiteDbConnectionLimit: make(chan int, config.EventDb.MaxConnection)}
 }
 
-func (sqLiteDb *SqLiteDb) NewReadWriteContext() (*SqLiteDbContext, error) {
-	return sqLiteDb.newContext("mode=rw")
-}
+func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx sqLiteDbRequired) (err error) {
+	sqLiteDb.sqLiteDbConnectionLimit <- 1
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?%s", sqLiteDb.config.EventDb.File, "mode=rwc"))
 
-func (sqLiteDb *SqLiteDb) newContext(parameters string) (*SqLiteDbContext, error) {
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?%s", sqLiteDb.Config.EventDb.File, parameters))
 	if err != nil {
-		return nil, err
+		<-sqLiteDb.sqLiteDbConnectionLimit
+		return err
 	}
 
-	return &SqLiteDbContext{db: db,
-		config: sqLiteDb.Config,
-	}, nil
-}
+	defer func() {
+		<-sqLiteDb.sqLiteDbConnectionLimit
+		if closeErr := db.Close(); err != nil {
+			log.Printf(support.Warn, closeErr)
+			err = closeErr
+		}
+	}()
 
-func (sqLiteDbContext *SqLiteDbContext) Close() error {
-	if err := sqLiteDbContext.db.Close(); err != nil {
-		return err
+	fnxErr := fnx(&SqLiteDbContext{db: db,
+		config: sqLiteDb.config,
+	})
+
+	if fnxErr != nil {
+		return fnxErr
 	}
 
 	return nil
 }
-
-type TransactionEnabled func(tx *sql.Tx) error
 
 func (sqLiteDbContext *SqLiteDbContext) WithTransaction(fnx TransactionEnabled) error {
 	tx, beginErr := sqLiteDbContext.db.Begin()
@@ -79,6 +88,7 @@ func MigrateUp(dbContext *SqLiteDbContext) error {
 	if err != nil {
 		return err
 	}
+
 	migrations, migrationInitErr := migrate.NewWithDatabaseInstance(
 		fmt.Sprintf("file://%s", support.Resolve(dbContext.config.EventDb.MigrationLoc)),
 		dbContext.config.EventDb.Name, driver)

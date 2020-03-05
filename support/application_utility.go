@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	runtime "runtime"
+	"runtime"
 )
 
 type TemporaryDir struct {

@@ -14,7 +14,9 @@ func AddTime(initialTime int64, unit int, duration time.Duration) int64 {
 
 func AssertThatJSONEqual(s1, s2 string) (bool, error) {
 	var o1 interface{}
+
 	var o2 interface{}
+
 	var err error
 
 	err = json.Unmarshal([]byte(s1), &o1)

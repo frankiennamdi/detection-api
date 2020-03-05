@@ -12,6 +12,10 @@ import (
 	"net/http"
 )
 
+type Server struct {
+	Config config.AppConfig
+}
+
 type ServerContext struct {
 	sqLitDb          *db.SqLiteDb
 	maxMindDb        *db.MaxMindDb
@@ -29,16 +33,16 @@ func (serverContext *ServerContext) MaxMindDb() *db.MaxMindDb {
 }
 
 func (server *Server) Configure() *ServerContext {
-	sqLiteDb := &db.SqLiteDb{Config: server.Config}
+	sqLiteDb := db.NewSqLiteDb(server.Config)
 	err := server.configureEventDb(sqLiteDb)
 
 	if err != nil {
 		log.Panicf(support.Fatal, err)
 	}
 
-	maxMindDb := &db.MaxMindDb{Config: server.Config}
+	maxMindDb := db.NewMaxMindDb(server.Config)
 	eventRepository := NewSQLLiteEventsRepository(sqLiteDb)
-	detectionService := NewDetectionService(eventRepository,
+	detectionService := NewLoginDetectionService(eventRepository,
 		NewMaxMindIPGeoInfoRepository(maxMindDb),
 		DefaultCalculatorService{},
 		server.Config.SuspiciousSpeed)
@@ -53,7 +57,7 @@ func (server *Server) Configure() *ServerContext {
 }
 
 func (serverContext *ServerContext) Listen() {
-	log.Printf(support.Info, fmt.Sprintf("Service Starting on Port : %d ...", serverContext.config.Server.Port))
+	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...", serverContext.config.Server.Port))
 
 	router := Router{serverContext: serverContext}
 	routes := router.InitRoutes()
@@ -66,24 +70,15 @@ func (serverContext *ServerContext) Listen() {
 func (server *Server) configureEventDb(sqLiteDb *db.SqLiteDb) (err error) {
 	log.Printf(support.Info, "configuring EventDb")
 
-	dbContext, err := sqLiteDb.NewCreateContext()
-
-	defer func() {
-		if closeErr := dbContext.Close(); closeErr != nil {
-			log.Printf(support.Info, "EventDb Context Close Failed")
-
-			err = closeErr
-
-			return
+	fnxErr := sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) error {
+		migrationErr := db.MigrateUp(context)
+		if migrationErr != nil {
+			return err
 		}
+		return nil
+	})
 
-		log.Printf(support.Info, "configuring EventDb Complete")
-	}()
+	log.Printf(support.Info, "configuring EventDb Complete")
 
-	migrationErr := db.MigrateUp(dbContext)
-	if migrationErr != nil {
-		return err
-	}
-
-	return nil
+	return fnxErr
 }
