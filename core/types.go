@@ -10,6 +10,7 @@ import (
 type EventRepository interface {
 	InsertEvents(events []*models.Event) ([]sql.Result, error)
 	FindRelatedEvents(event *models.Event, filter EventFilter) error
+	InsertAndFindRelatedEvents(event *models.Event, filter EventFilter) error
 }
 
 type EventFilter interface {

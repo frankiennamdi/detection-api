@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/frankiennamdi/detection-api/core"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/frankiennamdi/detection-api/config"
 	"github.com/frankiennamdi/detection-api/app"
+	"github.com/frankiennamdi/detection-api/config"
 	"github.com/frankiennamdi/detection-api/support"
 )
 
@@ -41,16 +40,7 @@ func main() {
 
 	server := core.Server{Config: *appConfig}
 	serverContext := server.Configure()
-	Listen(serverContext, app.NewServiceContext(serverContext))
-}
-
-func Listen(serverContext *core.ServerContext, ctx *app.ServiceContext) {
+	serviceContext := app.NewServiceContext(serverContext)
 	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...", serverContext.AppConfig().Server.Port))
-
-	router := app.Router{ServiceContext: ctx}
-	routes := router.InitRoutes()
-
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", serverContext.AppConfig().Server.Port), routes); err != nil {
-		log.Fatal(err)
-	}
+	serviceContext.Listen(serverContext.AppConfig().Server.Port)
 }

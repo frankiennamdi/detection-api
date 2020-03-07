@@ -37,6 +37,7 @@ func TestEventDetectionHandler(t *testing.T) {
 	handler := http.HandlerFunc(detectionController.EventDetectionHandler)
 	handler.ServeHTTP(requestRecorder, request)
 	req.Equal(http.StatusOK, requestRecorder.Code)
+
 	expected := &models.SuspiciousTravelResult{}
 
 	expected.CurrentGeo = &models.GeoPoint{

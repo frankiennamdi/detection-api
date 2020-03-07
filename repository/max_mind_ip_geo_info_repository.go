@@ -8,6 +8,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 )
 
+// provides services for mapping ip to geo point
 type MaxMindIPGeoInfoRepository struct {
 	maxMindDb *db.MaxMindDb
 }

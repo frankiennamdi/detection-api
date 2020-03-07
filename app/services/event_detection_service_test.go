@@ -73,9 +73,15 @@ func (mockEventRepo *MockEventRepository) InsertEvents(events []*models.Event) (
 	return nil, nil
 }
 
+func (mockEventRepo *MockEventRepository) InsertAndFindRelatedEvents(event *models.Event, 
+	filter core.EventFilter) error {
+	log.Printf(support.Info, event)
+	return mockEventRepo.FindRelatedEvents(event, filter)
+}
+
 func TestFindSuspiciousTravelInfo_Fail_When_No_Geo_Info_For_Current_Event(t *testing.T) {
 	req := require.New(t)
-	detectionService := NewLoginDetectionService(nil,
+	detectionService := NewDetectionService(nil,
 		&MockIPGeoInfoRepository{geoMap: make(map[string]*models.GeoPoint)},
 		nil,
 		500)
@@ -97,7 +103,7 @@ func TestFindSuspiciousTravelInfo_Fail_When_No_Geo_Info_For_Current_Event(t *tes
 
 func TestFindSuspiciousTravelInfo_When_No_Previous_Or_Subsequent_Event(t *testing.T) {
 	req := require.New(t)
-	detectionService := NewLoginDetectionService(nil,
+	detectionService := NewDetectionService(nil,
 		&MockIPGeoInfoRepository{geoMap: map[string]*models.GeoPoint{
 			"1.0.0.0": {
 				Latitude:       10,
@@ -130,7 +136,7 @@ func TestFindSuspiciousTravelInfo_When_No_Previous_Or_Subsequent_Event(t *testin
 
 func TestFindSuspiciousTravelInfo_When_No_Previous_But_Subsequent_Event(t *testing.T) {
 	req := require.New(t)
-	detectionService := NewLoginDetectionService(nil,
+	detectionService := NewDetectionService(nil,
 		&MockIPGeoInfoRepository{geoMap: map[string]*models.GeoPoint{
 			"1.0.0.0": {
 				Latitude:       10,
@@ -172,7 +178,7 @@ func TestFindSuspiciousTravelInfo_When_No_Previous_But_Subsequent_Event(t *testi
 
 func TestFindSuspiciousTravelInfo_When_No_Subsequent_But_Previous_Event(t *testing.T) {
 	req := require.New(t)
-	detectionService := NewLoginDetectionService(nil,
+	detectionService := NewDetectionService(nil,
 		&MockIPGeoInfoRepository{geoMap: map[string]*models.GeoPoint{
 			"1.0.0.0": {
 				Latitude:       10,
@@ -214,7 +220,7 @@ func TestFindSuspiciousTravelInfo_When_No_Subsequent_But_Previous_Event(t *testi
 
 func TestFindSuspiciousTravelInfo_When_All_Events_Present(t *testing.T) {
 	req := require.New(t)
-	detectionService := NewLoginDetectionService(nil,
+	detectionService := NewDetectionService(nil,
 		&MockIPGeoInfoRepository{geoMap: map[string]*models.GeoPoint{
 			"1.0.0.0": {
 				Latitude:       10,
@@ -284,7 +290,7 @@ func TestFindRelatedEvents(t *testing.T) {
 	events = append(events, subsequentEvents...)
 	events = append(events, currentEvent)
 
-	detectionService := NewLoginDetectionService(&MockEventRepository{userEvents: events}, nil, nil, 500)
+	detectionService := NewDetectionService(&MockEventRepository{userEvents: events}, nil, nil, 500)
 	relatedEvent, err := detectionService.findRelatedEvents(currentEvent)
 	req.NoError(err)
 	req.Equal(currentEvent, relatedEvent.CurrentEvent)

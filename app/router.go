@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// store the routes and handlers
 type Router struct {
 	ServiceContext *ServiceContext
 }

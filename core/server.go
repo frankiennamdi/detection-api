@@ -10,10 +10,12 @@ import (
 	"log"
 )
 
+// represent the server, the starting point of the system
 type Server struct {
 	Config config.AppConfig
 }
 
+// represents the initialized and configures core components of the system like database, and application configuration
 type ServerContext struct {
 	sqLitDb          *db.SqLiteDb
 	maxMindDb        *db.MaxMindDb
@@ -39,7 +41,9 @@ func (server *Server) Configure() *ServerContext {
 	if err != nil {
 		log.Panicf(support.Fatal, err)
 	}
+
 	maxMindDb := db.NewMaxMindDb(server.Config)
+
 	return &ServerContext{
 		sqLitDb:          sqLiteDb,
 		maxMindDb:        maxMindDb,

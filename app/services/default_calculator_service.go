@@ -7,6 +7,8 @@ import (
 	"github.com/frankiennamdi/detection-api/models"
 )
 
+// default calculator service implementation
+// provide calculation services like distance and time differences
 type DefaultCalculatorService struct{}
 
 const (

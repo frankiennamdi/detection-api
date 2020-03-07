@@ -8,6 +8,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 )
 
+// provide services for the MaxMind db
 type MaxMindDb struct {
 	config                   appConfig.AppConfig
 	maxMindDbConnectionLimit chan int

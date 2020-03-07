@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// immutable event
 type Event struct {
 	uuid      string
 	username  string
@@ -15,6 +16,7 @@ type Event struct {
 	ip        string
 }
 
+// mutable event info
 type EventInfo struct {
 	UUID      string `json:"event_uuid"`
 	Username  string `json:"username"`

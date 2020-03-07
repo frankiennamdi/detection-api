@@ -1,3 +1,4 @@
+// the application config, e.g. database and services
 package config
 
 import (

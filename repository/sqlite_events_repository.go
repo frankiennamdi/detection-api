@@ -8,12 +8,31 @@ import (
 	"github.com/frankiennamdi/detection-api/models"
 )
 
+// provides services for storing and retrieving events from SQLite database
 type SqLiteEventsRepository struct {
 	sqLiteDb *db.SqLiteDb
 }
 
 func NewSQLLiteEventsRepository(sqLiteDb *db.SqLiteDb) *SqLiteEventsRepository {
 	return &SqLiteEventsRepository{sqLiteDb: sqLiteDb}
+}
+
+func (eventRepository *SqLiteEventsRepository) InsertAndFindRelatedEvents(event *models.Event,
+	filter core.EventFilter) error {
+	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
+		if _, err = eventRepository.insertEvents([]*models.Event{event}, context); err != nil {
+			return nil
+		}
+		err = eventRepository.findAndFilter(event, filter, context)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return fnxErr
 }
 
 func (eventRepository *SqLiteEventsRepository) FindRelatedEvents(event *models.Event,

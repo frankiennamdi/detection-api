@@ -11,6 +11,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 )
 
+// provide services for SQLite db
 type SqLiteDb struct {
 	config                  appConfig.AppConfig
 	sqLiteDbConnectionLimit chan int

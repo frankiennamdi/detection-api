@@ -9,19 +9,20 @@ import (
 	"github.com/frankiennamdi/detection-api/models"
 )
 
-type LoginDetectionService struct {
+// service for detecting event characteristics relative to other events
+type EventDetectionService struct {
 	eventRepository     core.EventRepository
 	ipGeoInfoRepository core.IPGeoInfoRepository
 	calculatorService   core.CalculatorService
 	suspiciousSpeed     float64
 }
 
-func NewLoginDetectionService(
+func NewDetectionService(
 	eventRepository core.EventRepository,
 	ipGeoInfoRepository core.IPGeoInfoRepository,
 	calculatorService core.CalculatorService,
-	suspiciousSpeed float64) *LoginDetectionService {
-	return &LoginDetectionService{
+	suspiciousSpeed float64) *EventDetectionService {
+	return &EventDetectionService{
 		eventRepository:     eventRepository,
 		ipGeoInfoRepository: ipGeoInfoRepository,
 		calculatorService:   calculatorService,
@@ -29,7 +30,7 @@ func NewLoginDetectionService(
 	}
 }
 
-func (service LoginDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
+func (service EventDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
 	if _, err := service.eventRepository.InsertEvents([]*models.Event{currEvent}); err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (service LoginDetectionService) ProcessEvent(currEvent *models.Event) (*mod
 	return suspiciousTravelResult, err
 }
 
-func (service LoginDetectionService) findSuspiciousTravel(
+func (service EventDetectionService) findSuspiciousTravel(
 	relatedEventInfo *models.RelatedEventInfo) (*models.SuspiciousTravelResult, error) {
 	result := &models.SuspiciousTravelResult{}
 
@@ -126,9 +127,9 @@ func (service LoginDetectionService) findSuspiciousTravel(
 	return result, nil
 }
 
-func (service LoginDetectionService) findRelatedEvents(currEvent *models.Event) (*models.RelatedEventInfo, error) {
+func (service EventDetectionService) findRelatedEvents(currEvent *models.Event) (*models.RelatedEventInfo, error) {
 	filter := repository.NewRelatedEventsFilter(currEvent)
-	err := service.eventRepository.FindRelatedEvents(currEvent, filter)
+	err := service.eventRepository.InsertAndFindRelatedEvents(currEvent, filter)
 
 	if err != nil {
 		return nil, err

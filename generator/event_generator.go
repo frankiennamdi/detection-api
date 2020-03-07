@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"github.com/frankiennamdi/detection-api/test"
 	"log"
 	"math/rand"
@@ -16,6 +17,8 @@ import (
 )
 
 func main() {
+	numEvents := flag.Int("num", 3000, "number of events to generate")
+	flag.Parse()
 	log.Printf(support.Info, "Generating Events")
 
 	users := []string{"bob", "mark", "johnny", "mary", "kevin", "mike", "case"}
@@ -36,7 +39,7 @@ func main() {
 
 			rand.Seed(time.Now().Unix())
 
-			for i := 1; i < 3000; i++ {
+			for i := 1; i < *numEvents; i++ {
 				IP := IPlist[randomNum(0, len(IPlist)-1)]
 
 				timeChange := timeChanges[randomNum(0, len(timeChanges)-1)]

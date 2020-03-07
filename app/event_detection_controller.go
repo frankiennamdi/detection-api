@@ -10,6 +10,7 @@ import (
 	"github.com/frankiennamdi/detection-api/support"
 )
 
+//
 type EventDetectionController struct {
 	DetectionService core.DetectionService
 }

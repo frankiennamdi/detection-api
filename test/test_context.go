@@ -36,6 +36,7 @@ func SetUp() *Test {
 
 	server := core.Server{Config: appConfig}
 	appServerContext := server.Configure()
+
 	return &Test{
 		appConfig:        appConfig,
 		temporaryDir:     temporaryDir,
