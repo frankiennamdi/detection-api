@@ -1,0 +1,4 @@
+server:
+  host: ${SERVER_HOST}
+  port: ${SERVER_PORT}
+  count: 1
