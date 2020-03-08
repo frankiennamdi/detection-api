@@ -24,13 +24,13 @@ type SqLiteDbContext struct {
 
 type TransactionEnabled func(tx *sql.Tx) error
 
-type sqLiteDbRequired func(context *SqLiteDbContext) error
+type SQLiteDbRequired func(context *SqLiteDbContext) error
 
 func NewSqLiteDb(config appConfig.AppConfig) *SqLiteDb {
 	return &SqLiteDb{config: config, sqLiteDbConnectionLimit: make(chan int, config.EventDb.MaxConnection)}
 }
 
-func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx sqLiteDbRequired) (err error) {
+func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired) (err error) {
 	sqLiteDb.sqLiteDbConnectionLimit <- 1
 	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?%s", sqLiteDb.config.EventDb.File, "mode=rwc"))
 

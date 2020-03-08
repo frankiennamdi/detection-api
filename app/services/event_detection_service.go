@@ -31,10 +31,6 @@ func NewDetectionService(
 }
 
 func (service EventDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
-	if _, err := service.eventRepository.InsertEvents([]*models.Event{currEvent}); err != nil {
-		return nil, err
-	}
-
 	relatedEventInfo, err := service.findRelatedEvents(currEvent)
 	if err != nil {
 		return nil, err

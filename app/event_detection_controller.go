@@ -10,14 +10,14 @@ import (
 	"github.com/frankiennamdi/detection-api/support"
 )
 
-//
+// rest controller for detection
 type EventDetectionController struct {
 	DetectionService core.DetectionService
 }
 
 func (controller *EventDetectionController) EventDetectionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		respondWithError(w, http.StatusMethodNotAllowed, "POST Required")
+		errorResponse(w, http.StatusMethodNotAllowed, "POST Required")
 	}
 
 	var event *models.Event
@@ -26,7 +26,7 @@ func (controller *EventDetectionController) EventDetectionHandler(w http.Respons
 
 	if err != nil {
 		log.Printf(support.Error, err)
-		respondWithError(w, http.StatusBadRequest, "can pass request body")
+		errorResponse(w, http.StatusBadRequest, "can pass request body")
 
 		return
 	}
@@ -34,10 +34,10 @@ func (controller *EventDetectionController) EventDetectionHandler(w http.Respons
 	suspiciousTravelResult, err := controller.DetectionService.ProcessEvent(event)
 	if err != nil {
 		log.Printf(support.Error, err)
-		respondWithError(w, http.StatusBadRequest, "Unable to process request")
+		errorResponse(w, http.StatusBadRequest, "Unable to process request")
 
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, suspiciousTravelResult)
+	responseJSON(w, http.StatusOK, suspiciousTravelResult)
 }

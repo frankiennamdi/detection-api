@@ -9,5 +9,5 @@ import (
 
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf(support.Info, "service is up")
-	respondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	responseJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }

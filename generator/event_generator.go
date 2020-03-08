@@ -25,7 +25,7 @@ func main() {
 
 	IPlist := []string{"206.81.252.6", "24.242.71.20", "91.207.175.104"}
 
-	timeChanges := []int{1, -2, 2, -1}
+	timeChanges := []int{-1, -2, -3, -4, -5, 1, 2, 3, 4, 5}
 
 	startTime := int64(1514764800)
 
