@@ -1,14 +1,43 @@
 package models
 
-type GeoPoint struct {
-	Latitude       float64 `json:"lat"`
-	Longitude      float64 `json:"lon"`
-	AccuracyRadius uint16  `json:"radius"`
+type GeoDistance struct {
+	miles float64
+	km    float64
 }
 
-type GeoDistance struct {
-	Miles float64
-	Km    float64
+func NewGeoDistance(km float64, miles float64) *GeoDistance {
+	return &GeoDistance{
+		miles: miles,
+		km:    km,
+	}
+}
+
+func (geoDistance GeoDistance) Miles() float64 {
+	return geoDistance.miles
+}
+
+func (geoDistance GeoDistance) Km() float64 {
+	return geoDistance.km
+}
+
+type EventGeoInfo struct {
+	eventInfo *EventInfo
+	geoPoint  *GeoPoint
+}
+
+func NewEventGeoInfo(eventInfo *EventInfo, geoPoint *GeoPoint) *EventGeoInfo {
+	return &EventGeoInfo{
+		eventInfo: eventInfo,
+		geoPoint:  geoPoint,
+	}
+}
+
+func (eventGeoInfo EventGeoInfo) GeoPoint() *GeoPoint {
+	return eventGeoInfo.geoPoint
+}
+
+func (eventGeoInfo EventGeoInfo) EventInfo() *EventInfo {
+	return eventGeoInfo.eventInfo
 }
 
 type RelatedEventInfo struct {
@@ -17,9 +46,10 @@ type RelatedEventInfo struct {
 	SubsequentEvent *Event
 }
 
-type EventGeoInfo struct {
-	EventInfo *EventInfo
-	GeoPoint  *GeoPoint
+type GeoPoint struct {
+	Latitude       float64 `json:"lat"`
+	Longitude      float64 `json:"lon"`
+	AccuracyRadius uint16  `json:"radius"`
 }
 
 type SuspiciousTravelResult struct {

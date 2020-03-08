@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/frankiennamdi/detection-api/support"
 	"math"
 	"time"
 
@@ -20,7 +21,12 @@ func (service DefaultCalculatorService) degreesToRadians(degrees float64) float6
 	return degrees * math.Pi / 180
 }
 
-func (service DefaultCalculatorService) HaversineDistance(fromPoint, toPoint models.GeoPoint) models.GeoDistance {
+func (service DefaultCalculatorService) HaversineDistance(fromPoint,
+	toPoint *models.GeoPoint) (*models.GeoDistance, error) {
+	if fromPoint == nil || toPoint == nil {
+		return nil, support.NewIllegalArgumentError("fromPoint or toPoint cannot be nil")
+	}
+
 	var deltaLat = service.degreesToRadians(toPoint.Latitude - fromPoint.Latitude)
 
 	var deltaLon = service.degreesToRadians(toPoint.Longitude - fromPoint.Longitude)
@@ -31,10 +37,8 @@ func (service DefaultCalculatorService) HaversineDistance(fromPoint, toPoint mod
 
 	var c = 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
 
-	return models.GeoDistance{
-		Km:    math.Round(earthRadiusInKm*c*100) / 100,
-		Miles: math.Round(earthRadiusInMile*c*100) / 100,
-	}
+	return models.NewGeoDistance(
+		math.Round(earthRadiusInKm*c*100)/100, math.Round(earthRadiusInMile*c*100)/100), nil
 }
 
 func (service DefaultCalculatorService) TimeDifferenceInHours(currentTimeStamp, previousTimeStamp int64) float64 {
@@ -42,11 +46,20 @@ func (service DefaultCalculatorService) TimeDifferenceInHours(currentTimeStamp, 
 }
 
 func (service DefaultCalculatorService) SpeedToTravelDistanceInMPH(
-	eventGeoInfoFrom, eventGeoInfoTo models.EventGeoInfo) float64 {
-	distanceDiff := service.HaversineDistance(*eventGeoInfoFrom.GeoPoint, *eventGeoInfoTo.GeoPoint)
+	eventGeoInfoFrom, eventGeoInfoTo *models.EventGeoInfo) (*float64, error) {
+	if eventGeoInfoFrom == nil || eventGeoInfoTo == nil {
+		return nil, support.NewIllegalArgumentError("to and from geo information cannot be nil")
+	}
 
-	timeDiff := service.TimeDifferenceInHours(eventGeoInfoFrom.EventInfo.Timestamp,
-		eventGeoInfoTo.EventInfo.Timestamp)
+	distanceDiff, err := service.HaversineDistance(eventGeoInfoFrom.GeoPoint(), eventGeoInfoTo.GeoPoint())
 
-	return math.Abs(math.Round(distanceDiff.Miles / timeDiff))
+	if err != nil {
+		return nil, nil
+	}
+
+	timeDiff := service.TimeDifferenceInHours(eventGeoInfoFrom.EventInfo().Timestamp,
+		eventGeoInfoTo.EventInfo().Timestamp)
+	speed := math.Abs(math.Round(distanceDiff.Miles() / timeDiff))
+
+	return &speed, nil
 }

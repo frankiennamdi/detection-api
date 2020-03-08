@@ -71,18 +71,19 @@ func (service EventDetectionService) findSuspiciousTravel(
 		}
 
 		if preEventGeoInfo != nil {
-			travelToCurrentGeoSpeed := service.calculatorService.SpeedToTravelDistanceInMPH(models.EventGeoInfo{
-				EventInfo: &currEventInfo,
-				GeoPoint:  currEventGeoInfo,
-			}, models.EventGeoInfo{
-				EventInfo: &preEventInfo,
-				GeoPoint:  preEventGeoInfo,
-			})
-			value := travelToCurrentGeoSpeed >= service.suspiciousSpeed
+			travelToCurrentGeoSpeed, err := service.calculatorService.SpeedToTravelDistanceInMPH(
+				models.NewEventGeoInfo(&currEventInfo, currEventGeoInfo),
+				models.NewEventGeoInfo(&preEventInfo, preEventGeoInfo))
+
+			if err != nil {
+				return nil, err
+			}
+
+			value := *travelToCurrentGeoSpeed >= service.suspiciousSpeed
 			result.TravelToCurrentGeoSuspicious = &value
 			result.PrecedingIPAccess = &models.RelatedAccessInfo{
 				IP:             preEventInfo.IP,
-				Speed:          travelToCurrentGeoSpeed,
+				Speed:          *travelToCurrentGeoSpeed,
 				Latitude:       preEventGeoInfo.Latitude,
 				Longitude:      preEventGeoInfo.Longitude,
 				AccuracyRadius: preEventGeoInfo.AccuracyRadius,
@@ -100,18 +101,19 @@ func (service EventDetectionService) findSuspiciousTravel(
 		}
 
 		if subEventGeoInfo != nil {
-			travelFromCurrentGeoSpeed := service.calculatorService.SpeedToTravelDistanceInMPH(models.EventGeoInfo{
-				EventInfo: &currEventInfo,
-				GeoPoint:  currEventGeoInfo,
-			}, models.EventGeoInfo{
-				EventInfo: &subEventInfo,
-				GeoPoint:  subEventGeoInfo,
-			})
-			value := travelFromCurrentGeoSpeed >= service.suspiciousSpeed
+			travelFromCurrentGeoSpeed, err := service.calculatorService.SpeedToTravelDistanceInMPH(
+				models.NewEventGeoInfo(&currEventInfo, currEventGeoInfo),
+				models.NewEventGeoInfo(&subEventInfo, subEventGeoInfo))
+
+			if err != nil {
+				return nil, err
+			}
+
+			value := *travelFromCurrentGeoSpeed >= service.suspiciousSpeed
 			result.TravelFromCurrentGeoSuspicious = &value
 			result.SubsequentIPAccess = &models.RelatedAccessInfo{
 				IP:             subEventInfo.IP,
-				Speed:          travelFromCurrentGeoSpeed,
+				Speed:          *travelFromCurrentGeoSpeed,
 				Latitude:       subEventGeoInfo.Latitude,
 				Longitude:      subEventGeoInfo.Longitude,
 				AccuracyRadius: subEventGeoInfo.AccuracyRadius,

@@ -8,12 +8,12 @@ import (
 
 // store the routes and handlers
 type Router struct {
-	ServiceContext *ServiceContext
+	serviceContext *ServiceContext
 }
 
 func (router Router) setRoutes(routes *mux.Router) *mux.Router {
 	detectionController := EventDetectionController{
-		DetectionService: router.ServiceContext.DetectionService(),
+		detectionService: router.serviceContext.DetectionService(),
 	}
 
 	routes.HandleFunc("/api/health-check", StatusHandler).Methods(http.MethodGet)

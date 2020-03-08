@@ -17,7 +17,7 @@ func NewMaxMindIPGeoInfoRepository(maxMindDb *db.MaxMindDb) *MaxMindIPGeoInfoRep
 	return &MaxMindIPGeoInfoRepository{maxMindDb: maxMindDb}
 }
 
-func (repo *MaxMindIPGeoInfoRepository) FindGeoPoint(ip net.IP) (geoPoint *models.GeoPoint, err error) {
+func (repo MaxMindIPGeoInfoRepository) FindGeoPoint(ip net.IP) (geoPoint *models.GeoPoint, err error) {
 	var result *models.GeoPoint
 
 	fnxErr := repo.maxMindDb.WithMaxMindDb(func(db *geoip2.Reader) error {

@@ -27,14 +27,11 @@ type MockIPGeoInfoRepository struct {
 type MockCalculatorService struct{}
 
 func (mockCalculatorService MockCalculatorService) HaversineDistance(fromPoint,
-	toPoint models.GeoPoint) models.GeoDistance {
+	toPoint *models.GeoPoint) (*models.GeoDistance, error) {
 	log.Printf(support.Info, fromPoint)
 	log.Printf(support.Info, toPoint)
 
-	return models.GeoDistance{
-		Miles: 0,
-		Km:    0,
-	}
+	return models.NewGeoDistance(0, 0), nil
 }
 func (mockCalculatorService MockCalculatorService) TimeDifferenceInHours(currentTimeStamp,
 	previousTimeStamp int64) float64 {
@@ -45,9 +42,10 @@ func (mockCalculatorService MockCalculatorService) TimeDifferenceInHours(current
 }
 
 func (mockCalculatorService MockCalculatorService) SpeedToTravelDistanceInMPH(eventGeoInfoFrom,
-	eventGeoInfoTo models.EventGeoInfo) float64 {
-	return math.Abs(eventGeoInfoFrom.GeoPoint.Longitude - eventGeoInfoTo.GeoPoint.Longitude/
-		float64(eventGeoInfoFrom.EventInfo.Timestamp-eventGeoInfoTo.EventInfo.Timestamp))
+	eventGeoInfoTo *models.EventGeoInfo) (*float64, error) {
+	speed := math.Abs(eventGeoInfoFrom.GeoPoint().Longitude - eventGeoInfoTo.GeoPoint().Longitude/
+		float64(eventGeoInfoFrom.EventInfo().Timestamp-eventGeoInfoTo.EventInfo().Timestamp))
+	return &speed, nil
 }
 
 func (mockIPGeoInfoRepository MockIPGeoInfoRepository) FindGeoPoint(ip net.IP) (*models.GeoPoint, error) {
@@ -73,7 +71,7 @@ func (mockEventRepo *MockEventRepository) InsertEvents(events []*models.Event) (
 	return nil, nil
 }
 
-func (mockEventRepo *MockEventRepository) InsertAndFindRelatedEvents(event *models.Event, 
+func (mockEventRepo *MockEventRepository) InsertAndFindRelatedEvents(event *models.Event,
 	filter core.EventFilter) error {
 	log.Printf(support.Info, event)
 	return mockEventRepo.FindRelatedEvents(event, filter)
@@ -268,6 +266,69 @@ func TestFindSuspiciousTravelInfo_When_All_Events_Present(t *testing.T) {
 	req.NotNil(result.PrecedingIPAccess)
 	req.Equal(true, *result.TravelToCurrentGeoSuspicious)
 	req.Equal(true, *result.TravelFromCurrentGeoSuspicious)
+}
+
+func TestFindRelatedEvents_That_Filter_Works_On_UnOrdered_List(t *testing.T) {
+	currentTime := int64(1514764800)
+
+	currentEvent := newEvent(models.EventInfo{
+		UUID:      uuid.New().String(),
+		Username:  "john",
+		Timestamp: currentTime,
+		IP:        "1.0.0.0",
+	})
+
+	closestPreEvent := newEvent(models.EventInfo{
+		UUID:      uuid.New().String(),
+		Username:  "john",
+		Timestamp: test.AddTime(currentTime, -1, time.Hour),
+		IP:        "1.0.0.0",
+	})
+
+	closestSubEvent := newEvent(models.EventInfo{
+		UUID:      uuid.New().String(),
+		Username:  "john",
+		Timestamp: test.AddTime(currentTime, 1, time.Hour),
+		IP:        "1.0.0.0",
+	})
+
+	events := []*models.Event{
+		currentEvent,
+		newEvent(models.EventInfo{
+			UUID:      uuid.New().String(),
+			Username:  "john",
+			Timestamp: test.AddTime(currentTime, -10, time.Hour),
+			IP:        "1.0.0.0",
+		}),
+		newEvent(models.EventInfo{
+			UUID:      uuid.New().String(),
+			Username:  "john",
+			Timestamp: test.AddTime(currentTime, -9, time.Hour),
+			IP:        "1.0.0.0",
+		}),
+		closestPreEvent,
+		newEvent(models.EventInfo{
+			UUID:      uuid.New().String(),
+			Username:  "john",
+			Timestamp: test.AddTime(currentTime, 100, time.Hour),
+			IP:        "1.0.0.0",
+		}),
+		newEvent(models.EventInfo{
+			UUID:      uuid.New().String(),
+			Username:  "john",
+			Timestamp: test.AddTime(currentTime, 90, time.Hour),
+			IP:        "1.0.0.0",
+		}),
+		closestSubEvent,
+	}
+
+	detectionService := NewDetectionService(&MockEventRepository{userEvents: events}, nil, nil, 500)
+	req := require.New(t)
+	relatedEvent, err := detectionService.findRelatedEvents(currentEvent)
+	req.NoError(err)
+	req.Equal(relatedEvent.CurrentEvent, currentEvent)
+	req.Equal(relatedEvent.PreviousEvent, closestPreEvent)
+	req.Equal(relatedEvent.SubsequentEvent, closestSubEvent)
 }
 
 func TestFindRelatedEvents(t *testing.T) {

@@ -2,10 +2,11 @@
 package config
 
 import (
-	"github.com/frankiennamdi/detection-api/support"
-	"github.com/frankiennamdi/go-configuration/configuration"
 	"io/ioutil"
 	"log"
+
+	"github.com/frankiennamdi/detection-api/support"
+	"github.com/frankiennamdi/go-configuration/configuration"
 )
 
 type EventDbConfig struct {

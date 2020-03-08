@@ -1,9 +1,10 @@
 package test
 
 import (
-	"github.com/frankiennamdi/detection-api/core"
 	"log"
 	"path/filepath"
+
+	"github.com/frankiennamdi/detection-api/core"
 
 	"github.com/frankiennamdi/detection-api/config"
 	"github.com/frankiennamdi/detection-api/support"
@@ -34,7 +35,7 @@ func SetUp() *Test {
 		SuspiciousSpeed: 500,
 	}
 
-	server := core.Server{Config: appConfig}
+	server := core.NewServer(appConfig)
 	appServerContext := server.Configure()
 
 	return &Test{

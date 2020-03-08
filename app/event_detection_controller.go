@@ -12,10 +12,10 @@ import (
 
 // rest controller for detection
 type EventDetectionController struct {
-	DetectionService core.DetectionService
+	detectionService core.DetectionService
 }
 
-func (controller *EventDetectionController) EventDetectionHandler(w http.ResponseWriter, r *http.Request) {
+func (controller EventDetectionController) EventDetectionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		errorResponse(w, http.StatusMethodNotAllowed, "POST Required")
 	}
@@ -31,7 +31,7 @@ func (controller *EventDetectionController) EventDetectionHandler(w http.Respons
 		return
 	}
 
-	suspiciousTravelResult, err := controller.DetectionService.ProcessEvent(event)
+	suspiciousTravelResult, err := controller.detectionService.ProcessEvent(event)
 	if err != nil {
 		log.Printf(support.Error, err)
 		errorResponse(w, http.StatusBadRequest, "Unable to process request")

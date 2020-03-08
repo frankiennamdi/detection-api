@@ -26,7 +26,7 @@ type DetectionService interface {
 }
 
 type CalculatorService interface {
-	HaversineDistance(fromPoint, toPoint models.GeoPoint) models.GeoDistance
+	HaversineDistance(fromPoint, toPoint *models.GeoPoint) (*models.GeoDistance, error)
 	TimeDifferenceInHours(currentTimeStamp, previousTimeStamp int64) float64
-	SpeedToTravelDistanceInMPH(eventGeoInfoFrom, eventGeoInfoTo models.EventGeoInfo) float64
+	SpeedToTravelDistanceInMPH(eventGeoInfoFrom, eventGeoInfoTo *models.EventGeoInfo) (*float64, error)
 }

@@ -17,7 +17,7 @@ func NewSQLLiteEventsRepository(sqLiteDb *db.SqLiteDb) *SqLiteEventsRepository {
 	return &SqLiteEventsRepository{sqLiteDb: sqLiteDb}
 }
 
-func (eventRepository *SqLiteEventsRepository) InsertAndFindRelatedEvents(event *models.Event,
+func (eventRepository SqLiteEventsRepository) InsertAndFindRelatedEvents(event *models.Event,
 	filter core.EventFilter) error {
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
 		if _, err = eventRepository.insertEvents([]*models.Event{event}, context); err != nil {
@@ -35,7 +35,7 @@ func (eventRepository *SqLiteEventsRepository) InsertAndFindRelatedEvents(event 
 	return fnxErr
 }
 
-func (eventRepository *SqLiteEventsRepository) FindRelatedEvents(event *models.Event,
+func (eventRepository SqLiteEventsRepository) FindRelatedEvents(event *models.Event,
 	filter core.EventFilter) error {
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
 		err = eventRepository.findAndFilter(event, filter, context)
@@ -50,7 +50,7 @@ func (eventRepository *SqLiteEventsRepository) FindRelatedEvents(event *models.E
 	return fnxErr
 }
 
-func (eventRepository *SqLiteEventsRepository) InsertEvents(events []*models.Event) ([]sql.Result, error) {
+func (eventRepository SqLiteEventsRepository) InsertEvents(events []*models.Event) ([]sql.Result, error) {
 	var results []sql.Result
 
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
@@ -68,7 +68,7 @@ func (eventRepository *SqLiteEventsRepository) InsertEvents(events []*models.Eve
 	return results, nil
 }
 
-func (eventRepository *SqLiteEventsRepository) findAndFilter(event *models.Event,
+func (eventRepository SqLiteEventsRepository) findAndFilter(event *models.Event,
 	filter core.EventFilter,
 	context *db.SqLiteDbContext) (err error) {
 	stmt, err := context.Database().Prepare("SELECT * FROM events WHERE username = ? ORDER BY " +
@@ -115,7 +115,7 @@ func (eventRepository *SqLiteEventsRepository) findAndFilter(event *models.Event
 	return nil
 }
 
-func (eventRepository *SqLiteEventsRepository) insertEvents(events []*models.Event,
+func (eventRepository SqLiteEventsRepository) insertEvents(events []*models.Event,
 	context *db.SqLiteDbContext) ([]sql.Result, error) {
 	var results []sql.Result
 

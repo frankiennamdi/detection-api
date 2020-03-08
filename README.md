@@ -77,6 +77,9 @@ for me. https://github.com/frankiennamdi/go-configuration
 
 * Possible integration test that involves a running server.
 * Possible use of a more traditional database to handle the transaction load.
-* Clean up the use of pointers where needed.  
+* Clean up the use of pointers where needed. I tried to balance the need for nil value, immutability and copying. 
+In cases where I had the difficult choices I tried to hide the struct properties and not allow modification 
+after creation, except through the constructors in some cases. This means that the most properties are unexported
+and can only be accessed by functions that return their value after construction. 
 
 

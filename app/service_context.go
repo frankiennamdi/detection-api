@@ -38,7 +38,7 @@ func (serviceContext *ServiceContext) EventRepository() core.EventRepository {
 }
 
 func (serviceContext *ServiceContext) Listen(port int) {
-	router := Router{ServiceContext: serviceContext}
+	router := Router{serviceContext: serviceContext}
 	routes := router.InitRoutes()
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), routes); err != nil {

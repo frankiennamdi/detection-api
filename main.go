@@ -38,7 +38,7 @@ func main() {
 		log.Panicf(support.Fatal, err)
 	}
 
-	server := core.Server{Config: *appConfig}
+	server := core.NewServer(*appConfig)
 	serverContext := server.Configure()
 	serviceContext := app.NewServiceContext(serverContext)
 	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...", serverContext.AppConfig().Server.Port))

@@ -16,6 +16,44 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type BadMockDetectionService struct{}
+
+func (badMockService BadMockDetectionService) ProcessEvent(
+	currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
+	log.Printf(support.Info, currEvent)
+	return nil, fmt.Errorf("something bad happened")
+}
+
+func TestEventDetectionHandler_When_Payload_Is_Bad(t *testing.T) {
+	detectionController := EventDetectionController{
+		detectionService: &BadMockDetectionService{},
+	}
+
+	req := require.New(t)
+
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{}`))
+	req.Equal(http.StatusBadRequest, requestRecorder.Code)
+	req.Equal(`{"error":"can pass request body"}`, fmt.Sprint(requestRecorder.Body))
+}
+
+func TestEventDetectionHandler_When_DetectionService_Fails(t *testing.T) {
+	detectionController := EventDetectionController{
+		detectionService: &BadMockDetectionService{},
+	}
+
+	req := require.New(t)
+
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{
+		"username": "bob",
+		"unix_timestamp": 1514851200,
+		"event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e43",
+		"ip_address": "91.207.175.104"
+	}`))
+
+	req.Equal(http.StatusBadRequest, requestRecorder.Code)
+	req.Equal(`{"error":"Unable to process request"}`, fmt.Sprint(requestRecorder.Body))
+}
+
 func TestEventDetectionHandler(t *testing.T) {
 	testSetup := test.SetUp()
 	defer testSetup.CleanUp()
@@ -31,7 +69,7 @@ func TestEventDetectionHandler(t *testing.T) {
 	req.NoError(err)
 
 	detectionController := EventDetectionController{
-		DetectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
+		detectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
 	}
 	requestRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(detectionController.EventDetectionHandler)
@@ -53,7 +91,7 @@ func TestEventDetectionHandler_With_Subsequent_Event(t *testing.T) {
 	defer testSetup.CleanUp()
 
 	detectionController := EventDetectionController{
-		DetectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
+		detectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
 	}
 
 	req := require.New(t)
@@ -107,7 +145,7 @@ func TestEventDetectionHandler_With_Previous_And_Subsequent_Event(t *testing.T) 
 	defer testSetup.CleanUp()
 
 	detectionController := EventDetectionController{
-		DetectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
+		detectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
 	}
 
 	req := require.New(t)
