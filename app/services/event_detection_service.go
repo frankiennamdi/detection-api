@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/frankiennamdi/detection-api/core"
 	"github.com/frankiennamdi/detection-api/repository"
+	"github.com/frankiennamdi/detection-api/support"
 	"net"
 
 	"github.com/frankiennamdi/detection-api/models"
@@ -31,6 +32,10 @@ func NewDetectionService(
 }
 
 func (service EventDetectionService) ProcessEvent(currEvent *models.Event) (*models.SuspiciousTravelResult, error) {
+	if currEvent == nil {
+		return nil, support.NewIllegalArgumentError("currEvent cannot be nil")
+	}
+	
 	relatedEventInfo, err := service.findRelatedEvents(currEvent)
 	if err != nil {
 		return nil, err
