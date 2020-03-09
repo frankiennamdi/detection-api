@@ -31,7 +31,7 @@ func TestEventDetectionHandler_When_Payload_Is_Bad(t *testing.T) {
 
 	req := require.New(t)
 
-	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{}`))
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest("{}"))
 	req.Equal(http.StatusBadRequest, requestRecorder.Code)
 	req.Equal(`{"error":"can pass request body"}`, fmt.Sprint(requestRecorder.Body))
 }
@@ -58,22 +58,18 @@ func TestEventDetectionHandler(t *testing.T) {
 	testSetup := test.SetUp()
 	defer testSetup.CleanUp()
 
-	body := `{
+	detectionController := EventDetectionController{
+		detectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
+	}
+
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{
 		"username": "bob",
 		"unix_timestamp": 1514764800,
 		"event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e42",
 		"ip_address": "206.81.252.6"
-	}`
-	request, err := http.NewRequest(http.MethodPost, "/api/events", strings.NewReader(body))
-	req := require.New(t)
-	req.NoError(err)
+	}`))
 
-	detectionController := EventDetectionController{
-		detectionService: NewServiceContext(testSetup.AppServerContext()).DetectionService(),
-	}
-	requestRecorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(detectionController.EventDetectionHandler)
-	handler.ServeHTTP(requestRecorder, request)
+	req := require.New(t)
 	req.Equal(http.StatusOK, requestRecorder.Code)
 
 	expected := &models.SuspiciousTravelResult{}
@@ -96,9 +92,7 @@ func TestEventDetectionHandler_With_Subsequent_Event(t *testing.T) {
 
 	req := require.New(t)
 
-	var requestRecorder *httptest.ResponseRecorder
-
-	requestRecorder = newRecordedRequest(detectionController, newPostRequest(`{
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{
 		"username": "bob",
 		"unix_timestamp": 1514764800,
 		"event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e42",
@@ -150,9 +144,7 @@ func TestEventDetectionHandler_With_Previous_And_Subsequent_Event(t *testing.T) 
 
 	req := require.New(t)
 
-	var requestRecorder *httptest.ResponseRecorder
-
-	requestRecorder = newRecordedRequest(detectionController, newPostRequest(`{
+	requestRecorder := newRecordedRequest(detectionController, newPostRequest(`{
  		"username": "bob",
  		"unix_timestamp": 1514851200,
  		"event_uuid": "85ad929a-db03-4bf4-9541-8f728fa12e43",

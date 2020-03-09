@@ -35,7 +35,7 @@ func (service EventDetectionService) ProcessEvent(currEvent *models.Event) (*mod
 	if currEvent == nil {
 		return nil, support.NewIllegalArgumentError("currEvent cannot be nil")
 	}
-	
+
 	relatedEventInfo, err := service.findRelatedEvents(currEvent)
 	if err != nil {
 		return nil, err
