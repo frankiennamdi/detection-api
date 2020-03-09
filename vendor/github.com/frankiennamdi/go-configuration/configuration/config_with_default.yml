@@ -1,0 +1,4 @@
+server:
+  host: ${SERVER_HOST:-127.0.0.1}
+  port: ${SERVER_PORT:-5000}
+  count: ${SERVER_COUNT:-1}
