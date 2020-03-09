@@ -1,0 +1,1 @@
+resources folder for event db. event db is not checked in, but we want to retain this folder for easy testing.  

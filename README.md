@@ -58,6 +58,11 @@ I am only using the three IPs provided in the sample and hence the randomness is
 
 Please see Makefile for more information. 
 
+## Docker volume mapping
+The location for the database is in the resource/event-db folder. And the name is configurable. When running in docker 
+you can map the volume to the local storage e.g. `-v $(PWD)/resources/event-db:/app/resources/event-db` in the 
+`make run-image` target.
+
 ## External Dependencies
 
 1. Used open source DB drivers as indicated in the mod files, also used for DB migration.

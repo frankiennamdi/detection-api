@@ -5,6 +5,7 @@ import (
 	"github.com/frankiennamdi/detection-api/app/services"
 	"github.com/frankiennamdi/detection-api/core"
 	"github.com/frankiennamdi/detection-api/repository"
+	"github.com/frankiennamdi/detection-api/support"
 	"log"
 	"net/http"
 )
@@ -42,7 +43,7 @@ func (serviceContext *ServiceContext) Listen(port int) {
 	routes := router.InitRoutes()
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), routes); err != nil {
-		log.Fatal(err)
+		log.Panicf(support.Fatal, err)
 	}
 }
 

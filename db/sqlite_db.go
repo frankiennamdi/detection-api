@@ -30,9 +30,10 @@ func NewSqLiteDb(config appConfig.AppConfig) *SqLiteDb {
 	return &SqLiteDb{config: config, sqLiteDbConnectionLimit: make(chan int, config.EventDb.MaxConnection)}
 }
 
-func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired) (err error) {
+func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired, options string) (err error) {
 	sqLiteDb.sqLiteDbConnectionLimit <- 1
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?%s", sqLiteDb.config.EventDb.File, "mode=rwc"))
+	resolvedPath := fmt.Sprintf("%s?%s", sqLiteDb.config.EventDb.File, options)
+	db, err := sql.Open("sqlite3", resolvedPath)
 
 	if err != nil {
 		<-sqLiteDb.sqLiteDbConnectionLimit
@@ -41,7 +42,7 @@ func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired) (err error) 
 	}
 
 	defer func() {
-		if closeErr := db.Close(); err != nil {
+		if closeErr := db.Close(); closeErr != nil {
 			log.Printf(support.Warn, closeErr)
 			<-sqLiteDb.sqLiteDbConnectionLimit
 

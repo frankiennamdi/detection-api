@@ -1,4 +1,4 @@
 .idea
 cover.out
 bin
-resources/event-db
+resources/event-db/event_db.db

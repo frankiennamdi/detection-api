@@ -30,7 +30,7 @@ func (eventRepository SqLiteEventsRepository) InsertAndFindRelatedEvents(event *
 		}
 
 		return nil
-	})
+	}, "mode=rw")
 
 	return fnxErr
 }
@@ -45,7 +45,7 @@ func (eventRepository SqLiteEventsRepository) FindRelatedEvents(event *models.Ev
 		}
 
 		return nil
-	})
+	}, "mode=rw")
 
 	return fnxErr
 }
@@ -59,7 +59,7 @@ func (eventRepository SqLiteEventsRepository) InsertEvents(events []*models.Even
 			return err
 		}
 		return nil
-	})
+	}, "mode=rw")
 
 	if fnxErr != nil {
 		return nil, fnxErr

@@ -46,7 +46,7 @@ func (server *Server) Configure() *ServerContext {
 	if err != nil {
 		log.Panicf(support.Fatal, err)
 	}
-
+	log.Printf(support.Info, "configuring EventDb Complete")
 	maxMindDb := db.NewMaxMindDb(server.config)
 
 	return &ServerContext{
@@ -62,16 +62,9 @@ func (server *Server) configureEventDb(sqLiteDb *db.SqLiteDb) (err error) {
 	fnxErr := sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) error {
 		migrationErr := db.MigrateUp(context)
 		if migrationErr != nil {
-			return err
+			return migrationErr
 		}
 		return nil
-	})
-
-	if !support.FileExists(server.config.EventDb.File) {
-		log.Panic("database file does not exist")
-	}
-
-	log.Printf(support.Info, "configuring EventDb Complete")
-
+	}, "mode=rwc")
 	return fnxErr
 }
