@@ -20,11 +20,11 @@ func NewSQLLiteEventsRepository(sqLiteDb *db.SqLiteDb) *SqLiteEventsRepository {
 func (eventRepository SqLiteEventsRepository) InsertAndFindRelatedEvents(event *models.Event,
 	filter core.EventFilter) error {
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
-		if _, err = eventRepository.insertEvents([]*models.Event{event}, context); err != nil {
+		if _, err := eventRepository.insertEvents([]*models.Event{event}, context); err != nil {
 			return err
 		}
 
-		if err = eventRepository.findAndFilter(event, filter, context); err != nil {
+		if err := eventRepository.findAndFilter(event, filter, context); err != nil {
 			return err
 		}
 
