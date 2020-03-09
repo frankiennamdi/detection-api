@@ -36,6 +36,7 @@ func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired) (err error) 
 
 	if err != nil {
 		<-sqLiteDb.sqLiteDbConnectionLimit
+		log.Printf(support.Fatal, err)
 		return err
 	}
 
