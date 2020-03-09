@@ -67,6 +67,10 @@ func (server *Server) configureEventDb(sqLiteDb *db.SqLiteDb) (err error) {
 		return nil
 	})
 
+	if !support.FileExists(server.config.EventDb.File) {
+		log.Panic("database file does not exist")
+	}
+
 	log.Printf(support.Info, "configuring EventDb Complete")
 
 	return fnxErr

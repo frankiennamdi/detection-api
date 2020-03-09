@@ -51,3 +51,11 @@ func Resolve(path string) string {
 
 	return fmt.Sprintf("%s/%s", rootDir, path)
 }
+
+func FileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
