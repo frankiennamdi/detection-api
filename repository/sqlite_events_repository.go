@@ -21,11 +21,10 @@ func (eventRepository SqLiteEventsRepository) InsertAndFindRelatedEvents(event *
 	filter core.EventFilter) error {
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
 		if _, err = eventRepository.insertEvents([]*models.Event{event}, context); err != nil {
-			return nil
+			return err
 		}
-		err = eventRepository.findAndFilter(event, filter, context)
 
-		if err != nil {
+		if err = eventRepository.findAndFilter(event, filter, context); err != nil {
 			return err
 		}
 
@@ -38,9 +37,7 @@ func (eventRepository SqLiteEventsRepository) InsertAndFindRelatedEvents(event *
 func (eventRepository SqLiteEventsRepository) FindRelatedEvents(event *models.Event,
 	filter core.EventFilter) error {
 	fnxErr := eventRepository.sqLiteDb.WithSqLiteDbContext(func(context *db.SqLiteDbContext) (err error) {
-		err = eventRepository.findAndFilter(event, filter, context)
-
-		if err != nil {
+		if err = eventRepository.findAndFilter(event, filter, context); err != nil {
 			return err
 		}
 
