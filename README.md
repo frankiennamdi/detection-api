@@ -58,10 +58,10 @@ I am only using the three IPs provided in the sample and hence the randomness is
 
 Please see Makefile for more information. 
 
-## Docker volume mapping
+## Docker volume mapping with caveat
 The location for the database is in the resource/event-db folder. And the name is configurable. When running in docker 
 you can map the volume to the local storage e.g. `-v $(PWD)/resources/event-db:/app/resources/event-db` in the 
-`make run-image` target.
+`make run-image` target. The caveat is that this make the application slower from my observation. 
 
 ## External Dependencies
 
@@ -82,14 +82,16 @@ and allow the database to manage the access. The drawback of this means that it 
 number of file descriptors allowed on the system. To make the application graceful, we introduced the **DB_MAX_CONN**
 and **IP_GEO_DB_MAX_CONN** to allow you tune this based on the limit of the host machine. Currently they are
 both set to **200**
+5. Used db file as I felt this was more usable offline. 
 
 ## Possible Future Improvements
 
-* Possible integration test that involves a running server.
+* Possible use of a more tradition database or use of the memory version of SQLite. 
+* Possible integration tests that involves a running server.
 * Possible use of a more traditional database to handle the transaction load.
-* Clean up the use of pointers where needed. I tried to balance the need for nil value, immutability and copying. 
+* Clean up the use of pointers where needed. I tried to balance the need for nil values and check, immutability and copying. 
 In cases where I had the difficult choices I tried to hide the struct properties and not allow modification 
 after creation, except through the constructors in some cases. This means that the most properties are unexported
-and can only be accessed by functions that return their value after construction. 
+and can only be read by functions that return their value after construction. 
 
 

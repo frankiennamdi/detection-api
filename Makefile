@@ -27,10 +27,14 @@ build-image: clean build
 run-generator:
 	go run generator/event_generator.go -num=$(NUM_OF_EVENTS)
 
-run-image: build-image
+docker-run:
 	docker stop detection-api || true; docker rm detection-api || true;\
 	docker run -e CONFIG_FILE=/app/resources/config.yml \
 	-e DB_MIGRATION_LOC=/app/migrations \
 	-e IP_GEO_DB_LOC=/app/resources/geo-database/GeoLite2-City.mmdb \
 	-e SUSPICIOUS_SPEED=$(SUSPICIOUS_SPEED) \
 	--name detection-api -p 3000:3000 frankiennamdi/detection-api:$(VERSION)
+
+run-image: build-image docker-run
+
+restart-image: docker-run
