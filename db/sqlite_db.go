@@ -27,7 +27,11 @@ type TransactionEnabled func(tx *sql.Tx) error
 type SQLiteDbRequired func(context *SqLiteDbContext) error
 
 func NewSqLiteDb(config appConfig.AppConfig) *SqLiteDb {
-	return &SqLiteDb{config: config, sqLiteDbConnectionLimit: make(chan int, config.EventDb.MaxConnection)}
+	maxConnection := 200
+	if config.EventDb.MaxConnection > 0 {
+		maxConnection = config.EventDb.MaxConnection
+	}
+	return &SqLiteDb{config: config, sqLiteDbConnectionLimit: make(chan int, maxConnection)}
 }
 
 func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired, options string) (err error) {

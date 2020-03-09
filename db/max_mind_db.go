@@ -17,7 +17,11 @@ type MaxMindDb struct {
 type MaxMindDbRequired func(db *geoip2.Reader) error
 
 func NewMaxMindDb(config appConfig.AppConfig) *MaxMindDb {
-	return &MaxMindDb{config: config, maxMindDbConnectionLimit: make(chan int, config.IPGeoDbConfig.MaxConnection)}
+	maxConnections := 200
+	if config.IPGeoDbConfig.MaxConnection > 0 {
+		maxConnections = config.IPGeoDbConfig.MaxConnection
+	}
+	return &MaxMindDb{config: config, maxMindDbConnectionLimit: make(chan int, maxConnections)}
 }
 
 func (maxMindDb *MaxMindDb) WithMaxMindDb(fnx MaxMindDbRequired) (err error) {
