@@ -22,7 +22,7 @@ OR
 
 ## Requirements
 1. Go 1.13 
-2. Make, my version is GNU Make 4.2.1
+2. Make, my version is GNU Make 4.2.1. But also tested with 3.81
 3. Docker
 4. Tested on Mac OS
 
