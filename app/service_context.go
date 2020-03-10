@@ -15,6 +15,7 @@ import (
 type ServiceContext struct {
 	detectionService core.DetectionService
 	eventRepository  core.EventRepository
+	server *core.ServerContext
 }
 
 func NewServiceContext(ctx *core.ServerContext) *ServiceContext {
@@ -27,6 +28,7 @@ func NewServiceContext(ctx *core.ServerContext) *ServiceContext {
 	return &ServiceContext{
 		detectionService: detectionService,
 		eventRepository:  eventRepository,
+		server: ctx,
 	}
 }
 
@@ -38,11 +40,15 @@ func (serviceContext *ServiceContext) EventRepository() core.EventRepository {
 	return serviceContext.eventRepository
 }
 
-func (serviceContext *ServiceContext) Listen(port int) {
+func (serviceContext *ServiceContext) Listen() {
 	router := Router{serviceContext: serviceContext}
 	routes := router.InitRoutes()
 
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), routes); err != nil {
+	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...",
+		serviceContext.server.AppConfig().Server.Port))
+	
+	if err := http.ListenAndServe(fmt.Sprintf(":%d",
+		serviceContext.server.AppConfig().Server.Port), routes); err != nil {
 		log.Panicf(support.Fatal, err)
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/frankiennamdi/detection-api/core"
 	"log"
 	"os"
@@ -41,6 +40,5 @@ func main() {
 	server := core.NewServer(*appConfig)
 	serverContext := server.Configure()
 	serviceContext := app.NewServiceContext(serverContext)
-	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...", serverContext.AppConfig().Server.Port))
-	serviceContext.Listen(serverContext.AppConfig().Server.Port)
+	serviceContext.Listen()
 }
