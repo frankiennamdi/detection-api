@@ -48,12 +48,9 @@ func (sqLiteDb *SqLiteDb) WithSqLiteDbContext(fnx SQLiteDbRequired, options stri
 	defer func() {
 		if closeErr := db.Close(); closeErr != nil {
 			log.Printf(support.Warn, closeErr)
-			<-sqLiteDb.sqLiteDbConnectionLimit
-
 			err = closeErr
-		} else {
-			<-sqLiteDb.sqLiteDbConnectionLimit
 		}
+		<-sqLiteDb.sqLiteDbConnectionLimit
 	}()
 
 	fnxErr := fnx(&SqLiteDbContext{db: db,

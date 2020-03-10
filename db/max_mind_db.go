@@ -35,12 +35,10 @@ func (maxMindDb *MaxMindDb) WithMaxMindDb(fnx MaxMindDbRequired) (err error) {
 
 	defer func() {
 		if closeErr := db.Close(); closeErr != nil {
-			<-maxMindDb.maxMindDbConnectionLimit
 			log.Printf(support.Warn, closeErr)
 			err = closeErr
-		} else {
-			<-maxMindDb.maxMindDbConnectionLimit
 		}
+		<-maxMindDb.maxMindDbConnectionLimit
 	}()
 
 	if err := fnx(db); err != nil {

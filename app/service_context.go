@@ -46,7 +46,7 @@ func (serviceContext *ServiceContext) Listen() {
 
 	log.Printf(support.Info, fmt.Sprintf("service starting on Port : %d ...",
 		serviceContext.server.AppConfig().Server.Port))
-	
+
 	if err := http.ListenAndServe(fmt.Sprintf(":%d",
 		serviceContext.server.AppConfig().Server.Port), routes); err != nil {
 		log.Panicf(support.Fatal, err)
